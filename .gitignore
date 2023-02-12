@@ -5,3 +5,4 @@ __pycache__/
 secure.py
 /backend/migrations
 /venv
+.node_modules/
