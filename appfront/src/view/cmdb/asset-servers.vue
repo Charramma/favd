@@ -15,7 +15,7 @@
           </template> -->
         </Table>
         <!-- 实现定义出一个模态框 -->
-<!--       <Modal v-model="modalflag" title="Command Modal dialog box title" @on-ok="ok" @on-cancel="cancel">
+        <!--       <Modal v-model="modalflag" title="Command Modal dialog box title" @on-ok="ok" @on-cancel="cancel">
           <Input>xxx</Input>
           <Button>xxx</Button>
           <p>Content of dialog</p>
@@ -26,7 +26,10 @@
 </template>
 
 <script>
-import { getServerList, delServer } from '../../api/cmdb/servers'
+  import {
+    getServerList,
+    delServer
+  } from '../../api/cmdb/servers'
   export default {
     name: 'asset-servers',
     data() {
@@ -53,13 +56,13 @@ import { getServerList, delServer } from '../../api/cmdb/servers'
           },
           {
             title: '内网ip',
-            key: 'primaryIp',
+            key: 'private_ip',
             align: 'center',
             sortable: true
           },
           {
             title: '公网ip',
-            key: 'publicIp',
+            key: 'public_ip',
             align: 'center',
             sortable: true
           },
@@ -84,7 +87,7 @@ import { getServerList, delServer } from '../../api/cmdb/servers'
                 props: {
                   color: 'error'
                 }
-              }, params.row.status)
+              }, params.row.state)
             }
           },
           {
@@ -130,7 +133,7 @@ import { getServerList, delServer } from '../../api/cmdb/servers'
                   },
                   on: {
                     click: () => {
-                      this.remove(params.index)
+                      this.delServer(params.index)
                     }
                   }
                 }, '删除')
@@ -163,23 +166,55 @@ import { getServerList, delServer } from '../../api/cmdb/servers'
       ok() {
         // this.modalflag = true
       },
-      cancel(){
-        console.log
+      cancel() {
+        console.log("取消")
       },
+      // 获取主机列表
       getServerList() {
         // 调用api请求函数
-        getServerList().then( res => {
+        getServerList().then(res => {
           // 请求成功
           console.log(res.data)
-          if(res.data.status_code=10000){
-            console.log(res.data.message)
-            // this.table_data = res.data.data
-          }else{
+          if (res.data.status_code = 10000) {
+            // console.log(res.data.message)
+            this.table_data = res.data.data
+          } else {
             console.log(res.data.message)
           }
           this.$Message.error("出错了")
         })
-      }
+      },
+      delServer(index) {
+        // 找到当前要删除的数据
+        // var current_server = this.table_data.splice(index, 1)[0]
+        var current_server = this.table_data[index]
+        console.log(current_server.id)
+        // 在后端删除
+        console.log("current_server", current_server)
+        delServer(current_server.id)
+          .then(
+            // 请求成功的处理方式
+            res => {
+              console.log(res.data)
+              if (res.data.status_code = 10000) {
+                // 在前端删除table_data数据
+                this.table_data.splice(index, 1)
+                this.$Message.info(res.data.message);
+              } else {
+                console.log(res.data.message)
+              }
+            },
+            // 请求失败时的处理方式 => 可省
+            res => {
+              this.$Message.error("删除主机信息出错了");
+            }).catch(
+            err => {
+              console.log("出错了")
+              console.log(err)
+              this.$Message.error("删除主机信息出错了");
+            })
+        // catch 捕获同步异常(与tyr...except功能差不多) => 可省
+      },
     },
     mounted() {
       this.getServerList();
