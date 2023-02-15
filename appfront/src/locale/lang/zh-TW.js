@@ -25,7 +25,7 @@ export default {
   argslist: '參數管理',
   taskuser: '執行用戶',
   cron: '定時任務',
-  cronjobs: '定時列表',
+  cronjobs: '任務列表',
   cronlogs: '任務日誌',
   confd_project: '配置中心',
   domain: '域名解析',

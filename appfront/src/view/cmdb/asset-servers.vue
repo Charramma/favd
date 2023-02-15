@@ -176,12 +176,10 @@
           // 请求成功
           console.log(res.data)
           if (res.data.status_code = 10000) {
-            // console.log(res.data.message)
             this.table_data = res.data.data
           } else {
             console.log(res.data.message)
           }
-          this.$Message.error("出错了")
         })
       },
       delServer(index) {

@@ -376,9 +376,9 @@ export default [
         name: 'cronjobs',
         meta: {
           icon: 'md-list',
-          title: '定时列表'
+          title: '任务列表'
         },
-        component: () => import('@/view/components/asset-server/asset-server.vue')
+        component: () => import('@/view/task/task-list.vue')
       },
       {
         path: 'cronlogs',
