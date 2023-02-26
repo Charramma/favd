@@ -24,6 +24,7 @@ class UserProfile(db.Model):
 
     asset = db.relationship('Asset', backref='user_profile')
     api_tokens = db.relationship("APIToken", backref="user_profile")
+    tasklogs = db.relationship("TaskLog", backref="user_profile")
 
     # business_units = db.relationship('BusinessUnit', secondary='business_unit_user_profile',
     #                                  back_populates='user_profiles')

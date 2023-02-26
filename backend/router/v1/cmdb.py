@@ -39,5 +39,17 @@ class ServerView(Resource):
         return generate_response(data=f"主机{server.asset.asset_hostname}删除成功")
 
 
+# 测试异步任务
+from celery_app.tasks import celery_task
+
+@cmdb_bp.route('/celery/')
+def celery_task_view():
+    print("start")
+    # 执行异步任务
+    celery_task.delay("first")
+    print("end")
+    return "Celery"
+
+
 api.add_resource(ServersView, '/servers/')
 api.add_resource(ServerView, '/servers/<int:id>/')
