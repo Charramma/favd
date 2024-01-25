@@ -66,11 +66,11 @@
 			</Modal>
 
 		</div>
-		<br />
+		<!-- <br /> -->
 		<!-- 故障清单 表格 -->
-		<Table border :columns="errorTableHeader" :data="errorTableData"></Table>
+		<Table border :columns="insideTableHeader" :data="insideTableData"></Table>
 		<br />
-		<!-- <Page :current="1" show-total simple></Page> -->
+		<Page :total="insideTableTotalPage" size="small" show-total></Page>
 	</div>
 </template>
 
@@ -139,7 +139,7 @@
 					}
 				],
 				// 表头
-				errorTableHeader: [{
+				insideTableHeader: [{
 						title: '故障名称',
 						key: 'errorName',
 						sortable: true,
@@ -235,14 +235,23 @@
 						}
 					}
 				],
-				// 表格临时数据
-				errorTableData: []
+				insideTableData: [], // 表格数据
+        insideTablePage: "", // 表格页码
+        insideTableTotalPage: "", // 表格总页码
 			}
 		},
+    mounted() {
+      // 挂载组件时立即获取表格数据
+      this.handleTableData();
+    },
 		methods: {
 			...mapActions([
 				'handleAddFault'
 			]),
+      // 获取表格数据
+      handleTableData () {
+
+      },
 			// 编辑故障
 			editError(index) {
 
@@ -251,6 +260,9 @@
 			removeError(index) {
 
 			},
+      handleClear() {
+
+      },
 			// 提交故障
 			AddError(name) {
 				this.$refs[name].validate((valid) => {

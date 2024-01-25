@@ -18,6 +18,7 @@ from models.extension import db
 from serializer.ops_tools_serializer import fault_schema, faults_schema
 import string
 import random
+import math
 from datetime import datetime
 
 from Crypto.Cipher import AES
@@ -90,7 +91,9 @@ class RandomPassGenView(Resource):
 class FaultManageView(Resource):
     def get(self, fault_id):
         """获取单个故障信息"""
-        pass
+        data = FaultInfo.query.get(fault_id)
+        return generate_response(data=fault_schema.dump(data))
+
 
     def put(self, fault_id):
         """编辑已有故障信息"""
@@ -104,9 +107,15 @@ class FaultManageView(Resource):
 class FaultsManageView(Resource):
     def get(self):
         """获取故障信息"""
-        # 加上分页逻辑
-        faultsinfo = FaultInfo.query.all()
-        return generate_response(data=faults_schema.dump(faultsinfo))
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
+
+        # 获取分页数据，一次10条
+        faultsinfo = FaultInfo.query.paginate(page=page, per_page=per_page, error_out=False)
+        data_count = FaultInfo.query.count()    # 数据总量
+        total_page = math.ceil(data_count / per_page)   # 总页码数
+
+        return generate_response(data={"faults_info": faults_schema.dump(faultsinfo), "count": data_count, "total_page": total_page})
 
     def post(self):
         """新增故障信息"""

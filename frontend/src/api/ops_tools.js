@@ -34,6 +34,7 @@ export const randomPassGen = ({character, passLength}) => {
 	})
 }
 
+// 新建故障信息
 export const addFault = ({faultinfo}) => {
 	const data = {
 		faultinfo
@@ -43,4 +44,16 @@ export const addFault = ({faultinfo}) => {
 		data,
 		method: 'post'
 	})
+}
+
+// 获取故障信息
+export const getFaults = (page) => {
+  const data = {
+    page
+  }
+  return axios.request({
+    url: 'ops_tools/faults',
+    data,
+    method: 'get'
+  })
 }
