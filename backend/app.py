@@ -1,26 +1,31 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# @Time: 2023/12/29 16:40
+# @Author: Charramma
+# @E-Mail: huang.zyn@qq.com
+# @File: app.py
+# @Software: PyCharm
+
+
 from flask import Flask
-import router
 import models
-import serializer
+import router
 from flask_cors import CORS
 
 
 def create_app(config=None):
     app = Flask(__name__)
 
-    # 配置跨域资源共享
     cors = CORS(app, resource={'*': {'origins': '*'}})
 
-    # config
+    # 引入配置文件
     app.config.from_object('config.settings')
-    app.config.from_object('config.secure')
 
-    # init blueprint
-    router.init_app(app)
-
-    # init model
+    # 初始化ORM
     models.init_app(app)
 
-    serializer.init_app(app)
+    # 初始化蓝图
+    router.init_app(app)
+
 
     return app

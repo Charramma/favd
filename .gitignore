@@ -6,3 +6,4 @@ secure.py
 /backend/migrations
 /venv
 .node_modules/
+/frontend/node_modules

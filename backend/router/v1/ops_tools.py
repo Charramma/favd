@@ -1,134 +1,145 @@
-from libs.nestable_blueprint import NestableBlueprint
-from flask_restful import Api, Resource
-from libs.handler import default_error_handler
-from models.ops_tools import Task, TaskLog
-from flask import request, current_app, g
-from sqlalchemy import or_
-from celery_app.tasks import remote_ssh
-from models.user import UserProfile
-from models.extension import db
-from libs.response import generate_response
-from serializer.ops_tools import tasks_schema, task_schema, tasklog_schema, tasklogs_schema
-from libs.authorize import auth, permission_required
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# @Time: 2024/1/16 14:51
+# @Author: Charramma
+# @E-Mail: huang.zyn@qq.com
+# @File: ops_tools.py
+# @Software: PyCharm
 
-ops_tools_bp = NestableBlueprint('ops_tools_v1', __name__, url_prefix='ops_tools/')
-# 定义restapi对象
+
+from tools.nestable_blueprint import NestableBlueprint
+from flask_restful import Api, Resource
+from flask import current_app, request, jsonify
+from tools.response import generate_response
+from forms.ops_tools import RandomPassForm, FaultInfoForm
+from tools.error_code import ArgsTypeException, FormValidateException
+from models.ops_tools import FaultInfo
+from models.extension import db
+from serializer.ops_tools_serializer import fault_schema, faults_schema
+import string
+import random
+from datetime import datetime
+
+from Crypto.Cipher import AES
+from Crypto.Util.Padding import pad, unpad
+import base64
+
+ops_tools_bp = NestableBlueprint('ops_tools_v1', __name__, url_prefix='ops_tools')
+
 api = Api(ops_tools_bp)
 
-# 指定当出现异常时，所调用的处理方法
-# 当需要看到真实的错误信息时，请把下面这一句注释掉
-api.handle_error = default_error_handler
+# 密钥和偏移量，暂时用固定的
+key = b'\x9e\x0c\xed\xf6\x87\x18\x99\xc2E\xb4\x16\x18 \xa5\xe8\x02'
+iv = b'\x04\x1d\x14\xea\xc2j\xd2!]R0\xe9\xfe\x1e\xc1\xc1'
 
 
-class TasksView(Resource):
-    @auth.login_required
-    def get(self):
-        # 获取参数 => 参数默认获取到的都是str类型
-        params = request.args
-        keywords = params.get("keywords", "")
-        page = int(params.get("page", 1))
-        per_page = int(params.get("pagesize", current_app.config["PER_PAGE"]))
-
-        # 根据参数查询结果
-        if keywords:
-            result = Task.query.filter(or_(Task.task_name.contains(keywords), Task.task_command.contains(keywords),
-                                           Task.task_host.contains(keywords)))
-        else:
-            result = Task.query
-
-        # 分页
-        paginate_tasks = result.paginate(page, per_page=per_page, error_out=False)
-
-        # 生成要返回的数据
-        tasks = paginate_tasks.items
-
-        return generate_response(data=tasks_schema.dump(tasks), count=paginate_tasks.total)
-
-    @auth.login_required
+class EncryptView(Resource):
     def post(self):
-        # 获取参数
-        params = request.json
-        task_name = params.get("task_name", "")
-        task_command = params.get("task_command", "")
-        task_args = params.get("task_args", "")
-        task_host = params.get("task_host", "")
-        # 验证参数合法性wtforms
+        """aes加密"""
+        data = request.json
+        if data:
+            plain_text = data['plain_text']
+            encrypted_data = self.encrypt_aes(plain_text)
+            return generate_response(data={'encrypted_data': encrypted_data})
+        else:
+            raise ValueError
 
-        # 新建Task
-        task = Task(task_name=task_name, task_command=task_command,
-                    task_args=task_args, task_host=task_host)
-        db.session.add(task)
-        db.session.commit()
-
-        # 数据序列化并返回
-        return generate_response(data=task_schema.dump(task))
-
-
-class TaskView(Resource):
-    @auth.login_required
-    def put(self, task_id):
-        # 获取参数
-        params = request.json
-        task_name = params.get("task_name", "")
-        task_command = params.get("task_command", "")
-        task_args = params.get("task_args", "")
-        task_host = params.get("task_host", "")
-        # 验证参数合法性wtforms
-
-        # 编辑Task
-        task = Task.query.get(task_id)
-        task.task_name = task_name
-        task.task_command = task_command
-        task.task_host = task_host
-        task.task_args = task_args
-        db.session.add(task)
-        db.session.commit()
-
-        # 数据序列化并返回
-        return generate_response(data=task_schema.dump(task))
+    @staticmethod
+    def encrypt_aes(plain_text):
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        padded_data = pad(plain_text.encode('utf-8'), AES.block_size)
+        encrypted_data = cipher.encrypt(padded_data)
+        cipher_text = base64.b64encode(encrypted_data).decode('utf-8')
+        return cipher_text
 
 
-class RunTaskView(Resource):
-    @auth.login_required
-    def get(self, task_id):
-        # 执行任务 => 代码健壮性(try.except, if...else)
-        task = Task.query.get(task_id)
-        ret = remote_ssh.delay(task.task_host, task.task_command)
-        # user = UserProfile.query.get(g.user["uid"])
-        # 写日志
-        tasklog = TaskLog(task_id=task_id, tasklog_tid=ret.task_id, user=g.user["uid"])
-        db.session.add(tasklog)
-        db.session.commit()
-        # 返回结果
-        return generate_response(data=tasklog_schema.dump(tasklog))
+class DecryptView(Resource):
+    def post(self):
+        """aes解密"""
+        data = request.json
+        if data:
+            ciphertext = data["ciphertext"]
+            decrypted_data = self.decrypt_aes(ciphertext)
+            return generate_response(data={'decrypted_data': decrypted_data})
+        else:
+            raise ValueError
+
+    @staticmethod
+    def decrypt_aes(cipher_text):
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        encrypted_data = base64.b64decode(cipher_text)
+        decrypted_data = unpad(cipher.decrypt(encrypted_data), AES.block_size).decode('utf-8')
+        return decrypted_data
 
 
-# 获取所有日志，如果result为空，则取值并修改。
+class RandomPassGenView(Resource):
+    def post(self):
+        data = request.json
+        if not data:
+            raise ArgsTypeException(message="参数异常")
+        form = RandomPassForm(data=data)
+        if form.validate():
+            character = form.character.data
+            pass_length = form.passLength.data
 
-from celery.result import AsyncResult
-from celery_app import celery
+            random_pass = "".join(random.choices(character, k=int(pass_length)))
+            return generate_response(data={"random_pass": random_pass})
 
 
-class TaskLogsView(Resource):
+# 故障管理
+class FaultManageView(Resource):
+    def get(self, fault_id):
+        """获取单个故障信息"""
+        pass
 
-    @auth.login_required
-    @permission_required
+    def put(self, fault_id):
+        """编辑已有故障信息"""
+        pass
+
+    def delete(self, fault_id):
+        """删除已有故障信息"""
+        pass
+
+
+class FaultsManageView(Resource):
     def get(self):
-        # 可以分页、查询。。。。
-        tasklogs = TaskLog.query.all()
+        """获取故障信息"""
+        # 加上分页逻辑
+        faultsinfo = FaultInfo.query.all()
+        return generate_response(data=faults_schema.dump(faultsinfo))
 
-        for tasklog in tasklogs:
-            res = AsyncResult(tasklog.tasklog_tid, app=celery)
-            # 任务的返回值 => remote_ssh函数的返回值
-            tasklog.tasklog_result = res.result
-            # 任务的状态 =>
-            tasklog.tasklog_status = res.status
-            db.session.add(tasklog)
-        db.session.commit()
-        return generate_response(data=tasklogs_schema.dump(tasklogs), total=len(tasklogs))
+    def post(self):
+        """新增故障信息"""
+        data = request.json['faultinfo']
+
+        if not data:
+            raise ArgsTypeException(message="参数异常")
+
+        form = FaultInfoForm(data=data)
+        if form.validate():
+            try:
+                FaultInfo.create_fault(
+                    fault_name=form.faultName.data,
+                    fault_status=form.faultStatus.data,
+                    fault_level=form.faultLevel.data,
+                    responsible=form.responsible.data,
+                    handler=form.handler.data,
+                    start_time=form.startTime.data,
+                    end_time=form.endTime.data,
+                    cause_of_fault=form.causeOfFault.data,
+                    summary_of_fault=form.summaryOfFault.data
+                )
+                return generate_response(data={"message": "提交成功"})
+            except Exception as e:
+                print(e)
+                return jsonify({"message": "插入数据库失败"})
+        else:
+            result = form.errors
+            return jsonify({"message": result})
 
 
-api.add_resource(TasksView, '/tasks/')
-api.add_resource(TaskView, '/tasks/<task_id>/')
-api.add_resource(RunTaskView, '/run/<task_id>/')
-api.add_resource(TaskLogsView, '/tasklogs/')
+api.add_resource(EncryptView, '/encrypt')
+api.add_resource(DecryptView, '/decrypt')
+api.add_resource(RandomPassGenView, '/random_pass')
+api.add_resource(FaultsManageView, '/faults')
+api.add_resource(FaultManageView, '/faults/<fault_id>')
