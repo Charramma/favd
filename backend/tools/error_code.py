@@ -66,3 +66,15 @@ class Success(object):
     message = "OK"
     status_code = 10000
     code = 200
+
+
+class DataNotFoundException(APIException):
+    message = "查询的数据不存在"
+    status_code = 10005
+    code = 404
+
+
+class DatabaseOperationException(APIException):
+    message = "数据库操作异常"
+    status_code = 10007
+    code = 500

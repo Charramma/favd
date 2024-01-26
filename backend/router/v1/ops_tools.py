@@ -12,7 +12,8 @@ from flask_restful import Api, Resource
 from flask import current_app, request, jsonify
 from tools.response import generate_response
 from forms.ops_tools import RandomPassForm, FaultInfoForm
-from tools.error_code import ArgsTypeException, FormValidateException
+from tools.error_code import ArgsTypeException, FormValidateException, DataNotFoundException, Success, \
+    DatabaseOperationException
 from models.ops_tools import FaultInfo
 from models.extension import db
 from serializer.ops_tools_serializer import fault_schema, faults_schema
@@ -91,17 +92,55 @@ class RandomPassGenView(Resource):
 class FaultManageView(Resource):
     def get(self, fault_id):
         """获取单个故障信息"""
-        data = FaultInfo.query.get(fault_id)
-        return generate_response(data=fault_schema.dump(data))
-
+        fault = FaultInfo.query.get(fault_id)
+        if fault:
+            return generate_response(data=fault_schema.dump(fault))
+        else:
+            raise DataNotFoundException(message="故障信息不存在")
 
     def put(self, fault_id):
         """编辑已有故障信息"""
-        pass
+        data = request.json['faultinfo']
+        if not data:
+            raise ArgsTypeException(message="参数异常")
+
+        form = FaultInfoForm(data=data)
+        if form.validate():
+            try:
+                FaultInfo.change_fault(
+                    fault_id=fault_id,
+                    fault_name=form.faultName.data,
+                    fault_status=form.faultStatus.data,
+                    fault_level=form.faultLevel.data,
+                    responsible=form.responsible.data,
+                    handler=form.handler.data,
+                    start_time=form.startTime.data,
+                    end_time=form.endTime.data,
+                    cause_of_fault=form.causeOfFault.data,
+                    summary_of_fault=form.summaryOfFault.data)
+                return generate_response(data=fault_schema.dump(FaultInfo.query.get(fault_id)))
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+                raise DatabaseOperationException(message="修改故障信息失败")
+        else:
+            result = form.errors
+            return jsonify({"message": result})
 
     def delete(self, fault_id):
         """删除已有故障信息"""
-        pass
+        fault = FaultInfo.query.get(fault_id)
+        if fault:
+            try:
+                db.session.delete(fault)
+                db.session.commit()
+                return generate_response(message="删除成功", data=fault_schema.dump(fault))
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+                raise DatabaseOperationException(message="删除故障信息失败")
+        else:
+            raise DataNotFoundException(message="故障信息不存在")
 
 
 class FaultsManageView(Resource):
@@ -112,10 +151,11 @@ class FaultsManageView(Resource):
 
         # 获取分页数据，一次10条
         faultsinfo = FaultInfo.query.paginate(page=page, per_page=per_page, error_out=False)
-        data_count = FaultInfo.query.count()    # 数据总量
-        total_page = math.ceil(data_count / per_page)   # 总页码数
+        data_count = FaultInfo.query.count()  # 数据总量
+        total_page = math.ceil(data_count / per_page)  # 总页码数
 
-        return generate_response(data={"faults_info": faults_schema.dump(faultsinfo), "count": data_count, "total_page": total_page})
+        return generate_response(
+            data={"faults_info": faults_schema.dump(faultsinfo), "count": data_count, "total_page": total_page})
 
     def post(self):
         """新增故障信息"""

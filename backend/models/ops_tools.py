@@ -46,3 +46,26 @@ class FaultInfo(db.Model):
 
         db.session.add(fault)
         db.session.commit()
+
+    @classmethod
+    def change_fault(cls, fault_id, fault_name, fault_status, fault_level, responsible, handler, start_time, end_time,
+                     cause_of_fault, summary_of_fault):
+        """修改故障信息时调用该函数，需要对日期格式进行处理"""
+        fault = cls().query.get(fault_id)
+        fault.falut_name = fault_name
+        fault.fault_status = fault_status
+        fault.fault_level = fault_level
+        fault.responsible = responsible
+        fault.handler = handler
+        fault.cause_of_fault = cause_of_fault
+        fault.summary_of_fault = summary_of_fault
+
+        if start_time:
+            start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+            fault.start_time = start_time
+
+        if end_time:
+            end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+            fault.end_time = end_time
+
+        db.session.commit()
