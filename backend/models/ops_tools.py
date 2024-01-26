@@ -43,9 +43,11 @@ class FaultInfo(db.Model):
         if end_time:
             end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
             fault.end_time = end_time
-
-        db.session.add(fault)
-        db.session.commit()
+        try:
+            db.session.add(fault)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
 
     @classmethod
     def change_fault(cls, fault_id, fault_name, fault_status, fault_level, responsible, handler, start_time, end_time,
@@ -67,5 +69,7 @@ class FaultInfo(db.Model):
         if end_time:
             end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
             fault.end_time = end_time
-
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()

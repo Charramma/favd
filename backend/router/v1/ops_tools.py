@@ -121,7 +121,6 @@ class FaultManageView(Resource):
                 return generate_response(data=fault_schema.dump(FaultInfo.query.get(fault_id)))
             except Exception as e:
                 print(e)
-                db.session.rollback()
                 raise DatabaseOperationException(message="修改故障信息失败")
         else:
             result = form.errors
