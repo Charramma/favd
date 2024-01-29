@@ -48,14 +48,17 @@ export const addFault = ({faultinfo}) => {
 
 // 获取故障信息
 export const getFaults = (page) => {
-  const data = {
-    page
-  }
   return axios.request({
-    url: `ops_tools/faults`,
-    params: data.page,
+    url: 'ops_tools/faults',
+    params: page,
     method: 'get'
   })
-  // return axios.get(`ops_tools/faults?page=${page}`);
+}
 
+// 删除故障信息
+export const delFault = (fault_id) => {
+  return axios.request({
+    url: `ops_tools/faults/${fault_id}`,
+    method: 'delete'
+  })
 }

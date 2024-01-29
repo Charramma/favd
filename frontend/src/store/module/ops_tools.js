@@ -2,9 +2,10 @@ import {
 	encrypt,
 	decrypt,
 	randomPassGen,
-	addFault
+	addFault,
+  getFaults,
+  delFault
 } from '@/api/ops_tools.js'
-import { getFaults } from '../../api/ops_tools'
 
 export default {
 	state: {
@@ -120,6 +121,17 @@ export default {
           commit('setFaultsInfo', data.data.faults_info);
           commit('setTotalPage', data.data.total_page);
           commit('setFaultCount', data.data.count);
+          resolve();
+        }).catch(err => {
+          reject(err);
+        })
+      })
+    },
+    // 根据fault_id删除故障信息
+    handleDelFault({ commit }, fault_id) {
+      return new Promise((resolve, reject) => {
+        delFault({fault_id}).then(res => {
+          const data = res.data;
           resolve();
         }).catch(err => {
           reject(err);

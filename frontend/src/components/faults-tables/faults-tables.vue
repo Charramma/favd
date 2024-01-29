@@ -253,7 +253,7 @@ import ops_tools from '../../store/module/ops_tools';
     },
 		methods: {
 			...mapActions([
-				'handleAddFault', 'handleGetFaults'
+				'handleAddFault', 'handleGetFaults', 'handleDelFault'
 			]),
       // 获取表格数据
       handleTableData () {
@@ -277,7 +277,13 @@ import ops_tools from '../../store/module/ops_tools';
 			},
 			// 删除故障
 			removeError(index) {
-
+        this.handleDelFault(this.insideTableData[index].fault_id).then(() => {
+          this.$Message.success('删除故障信息成功');
+        }).catch(err => {
+          this.$Message.error(err);
+          console.error('删除故障信息失败', err);
+        })
+        // console.log(this.insideTableData[index].fault_id);
 			},
       handleClear() {
 
