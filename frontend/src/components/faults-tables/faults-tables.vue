@@ -71,7 +71,7 @@
 		<Table border :columns="insideTableHeader" :data="insideTableData"></Table>
 		<br />
     <!-- 分页 -->
-		<Page :model-value="insideTablePage" :total="insideTableDataCount" show-total @on-change="handleTableData"></Page>
+		<Page :model-value="insideTablePage" :total="insideTableDataCount" show-total @on-change="handlePageChange"></Page>
 	</div>
 </template>
 
@@ -265,6 +265,11 @@ import ops_tools from '../../store/module/ops_tools';
 					this.$Message.error(err);
 					console.error("获取故障信息失败: ", err);
 				});
+      },
+      // 分页器页码改变时触发的方法
+      handlePageChange(page) {
+        this.insideTablePage = page;
+        this.handleTableData();
       },
 			// 编辑故障
 			editError(index) {

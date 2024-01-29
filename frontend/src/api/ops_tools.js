@@ -52,8 +52,10 @@ export const getFaults = (page) => {
     page
   }
   return axios.request({
-    url: 'ops_tools/faults',
-    data,
+    url: `ops_tools/faults`,
+    params: data.page,
     method: 'get'
   })
+  // return axios.get(`ops_tools/faults?page=${page}`);
+
 }
