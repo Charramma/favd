@@ -70,7 +70,8 @@
 		<!-- 故障清单 表格 -->
 		<Table border :columns="insideTableHeader" :data="insideTableData"></Table>
 		<br />
-		<Page :total="insideTableTotalPage" size="small" show-total></Page>
+    <!-- 分页 -->
+		<Page :model-value="insideTablePage" :total="insideTableDataCount" show-total @on-change="handleTableData"></Page>
 	</div>
 </template>
 
@@ -78,6 +79,7 @@
 	import {
 		mapActions
 	} from 'vuex';
+import ops_tools from '../../store/module/ops_tools';
 	export default {
 		name: 'FaultsTables',
 		data() {
@@ -141,19 +143,19 @@
 				// 表头
 				insideTableHeader: [{
 						title: '故障名称',
-						key: 'errorName',
+						key: 'falut_name',
 						sortable: true,
 						align: "center"
 					},
 					{
 						title: '故障状态',
-						key: 'errorStatus',
+						key: 'fault_status',
 						sortable: true,
 						align: "center"
 					},
 					{
 						title: '故障级别',
-						key: 'errorLevel',
+						key: 'fault_level',
 						sortable: true,
 						align: "center"
 					},
@@ -163,6 +165,11 @@
 						sortable: true,
 						align: "center"
 					},
+          {
+            title: '处理人',
+            key: 'handler',
+            align: "center"
+          },
 					{
 						title: '故障报告',
 						key: 'errorReport',
@@ -189,13 +196,13 @@
 					},
 					{
 						title: '开始时间',
-						key: 'startTime',
+						key: 'start_time',
 						sortable: true,
 						align: "center"
 					},
 					{
 						title: '结束时间',
-						key: 'endTime',
+						key: 'end_time',
 						sortable: true,
 						align: "center"
 					},
@@ -236,8 +243,8 @@
 					}
 				],
 				insideTableData: [], // 表格数据
-        insideTablePage: "", // 表格页码
-        insideTableTotalPage: "", // 表格总页码
+        insideTablePage: "1", // 表格页码
+        insideTableDataCount: "", // 表格总页码
 			}
 		},
     mounted() {
@@ -246,11 +253,18 @@
     },
 		methods: {
 			...mapActions([
-				'handleAddFault'
+				'handleAddFault', 'handleGetFaults'
 			]),
       // 获取表格数据
       handleTableData () {
-
+        console.log(this.insideTablePage)
+        this.handleGetFaults(this.insideTablePage).then(() => {
+          this.insideTableData = this.$store.getters.getFaultsInfo;
+          this.insideTableDataCount = this.$store.getters.getFaultCount;
+        }).catch(err => {
+					this.$Message.error(err);
+					console.error("获取故障信息失败: ", err);
+				});
       },
 			// 编辑故障
 			editError(index) {
@@ -306,6 +320,7 @@
 <style>
 	div.search-con-top>* {
 		margin-right: 5px;
+    margin-bottom: 5px;
 	}
 
 	.vertical-center-modal {
