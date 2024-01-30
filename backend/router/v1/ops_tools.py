@@ -94,6 +94,9 @@ class FaultManageView(Resource):
         """获取单个故障信息"""
         fault = FaultInfo.query.get(fault_id)
         if fault:
+            print(type(fault.start_time))
+            # fault.start_time = fault.start_time.strftime("%Y-%m-%d %H:%M:%S")
+            # fault.end_time = fault.end_time.strftime("%Y-%m-%d %H:%M:%S")
             return generate_response(data=fault_schema.dump(fault))
         else:
             raise DataNotFoundException(message="故障信息不存在")

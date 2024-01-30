@@ -41,7 +41,7 @@ class FaultInfoForm(Form):
     causeOfFault = StringField('故障原因')  # 可以为空
     summaryOfFault = StringField('故障总结')  # 可以为空
 
-    def validate(self):
+    def validate(self, extra_validators=None):
         if not super().validate():
             return False
         else:

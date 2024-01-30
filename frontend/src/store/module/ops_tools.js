@@ -130,7 +130,7 @@ export default {
     // 根据fault_id删除故障信息
     handleDelFault({ commit }, fault_id) {
       return new Promise((resolve, reject) => {
-        delFault({fault_id}).then(res => {
+        delFault(fault_id).then(res => {
           const data = res.data;
           resolve();
         }).catch(err => {

@@ -69,9 +69,10 @@
 		<!-- <br /> -->
 		<!-- 故障清单 表格 -->
 		<Table border :columns="insideTableHeader" :data="insideTableData"></Table>
-		<br />
+    <Modal v-model="showFaultCauseModal" title="故障原因">{{currentFaultCause}}</Modal>
+    <Modal v-model="showFaultSummaryModal" title="故障总结">{{currentFaultSummary}}</Modal>
     <!-- 分页 -->
-		<Page :model-value="insideTablePage" :total="insideTableDataCount" show-total @on-change="handlePageChange"></Page>
+		<Page :model-value="insideTablePage" :total="insideTableDataCount" show-total @on-change="handlePageChange" style="margin-top: 10px;"></Page>
 	</div>
 </template>
 
@@ -140,7 +141,7 @@ import ops_tools from '../../store/module/ops_tools';
 						lable: '故障责任人'
 					}
 				],
-				// 表头
+				// 表格：表头
 				insideTableHeader: [{
 						title: '故障名称',
 						key: 'falut_name',
@@ -150,13 +151,15 @@ import ops_tools from '../../store/module/ops_tools';
 					{
 						title: '故障状态',
 						key: 'fault_status',
-						sortable: true,
+						// sortable: true,
+            width: 100,
 						align: "center"
 					},
 					{
 						title: '故障级别',
 						key: 'fault_level',
-						sortable: true,
+            width: 100,
+						// sortable: true,
 						align: "center"
 					},
 					{
@@ -170,10 +173,34 @@ import ops_tools from '../../store/module/ops_tools';
             key: 'handler',
             align: "center"
           },
+          {
+          	title: '故障原因',
+          	key: 'cause_of_fault',
+          	width: 100,
+          	align: 'center',
+          	render: (h, params) => {
+          		return h('div', [
+          			h('Button', {
+          				props: {
+          					type: 'primary',
+          					size: 'small'
+          				},
+          				style: {
+          					marginRight: '5px'
+          				},
+          				on: {
+          					click: () => {
+          						this.showFaultCause(params.index)
+          					}
+          				}
+          			}, '查看原因')
+          		])
+          	}
+          },
 					{
-						title: '故障报告',
-						key: 'errorReport',
-						width: 150,
+						title: '故障总结',
+						key: 'summary_of_fault',
+						width: 100,
 						align: 'center',
 						render: (h, params) => {
 							return h('div', [
@@ -187,7 +214,7 @@ import ops_tools from '../../store/module/ops_tools';
 									},
 									on: {
 										click: () => {
-											this.showErrorReport(params.index)
+											this.showFaultSummary(params.index)
 										}
 									}
 								}, '查看报告')
@@ -245,12 +272,20 @@ import ops_tools from '../../store/module/ops_tools';
 				insideTableData: [], // 表格数据
         insideTablePage: "1", // 表格页码
         insideTableDataCount: "", // 表格总页码
+        showFaultCauseModal: false, // 查看故障原因对话框
+        showFaultSummaryModal: false, // 查看故障总结对话框
+        currentFaultCause: "",
+        currentFaultSummary: ""
 			}
 		},
     mounted() {
       // 挂载组件时立即获取表格数据
       this.handleTableData();
     },
+    // updated() {
+    //   // 数据变化时更新表格数据
+    //   this.handleTableData(); // 更新表格数据
+    // },
 		methods: {
 			...mapActions([
 				'handleAddFault', 'handleGetFaults', 'handleDelFault'
@@ -266,6 +301,15 @@ import ops_tools from '../../store/module/ops_tools';
 					console.error("获取故障信息失败: ", err);
 				});
       },
+      // 查看故障原因
+      showFaultCause (index) {
+        this.currentFaultCause = this.insideTableData[index].cause_of_fault ? this.insideTableData[index].cause_of_fault : '无';
+        this.showFaultCauseModal = true;
+      },
+      showFaultSummary (index) {
+        this.currentFaultSummary = this.insideTableData[index].summary_of_fault ? this.insideTableData[index].summary_of_fault : '无';
+        this.showFaultSummaryModal = true;
+      },
       // 分页器页码改变时触发的方法
       handlePageChange(page) {
         this.insideTablePage = page;
@@ -279,15 +323,14 @@ import ops_tools from '../../store/module/ops_tools';
 			removeError(index) {
         this.handleDelFault(this.insideTableData[index].fault_id).then(() => {
           this.$Message.success('删除故障信息成功');
+          this.handleTableData(); // 更新表格数据
         }).catch(err => {
           this.$Message.error(err);
           console.error('删除故障信息失败', err);
         })
         // console.log(this.insideTableData[index].fault_id);
 			},
-      handleClear() {
 
-      },
 			// 提交故障
 			AddError(name) {
 				this.$refs[name].validate((valid) => {
@@ -300,6 +343,7 @@ import ops_tools from '../../store/module/ops_tools';
 							this.$Message.success('提交成功');
 							this.$refs.addFaultForm.resetFields(); // 重置表单数据
 							this.addFaultMoal = false; // 关闭对话框
+              this.handleTableData(); // 更新表格数据
 						}).catch(err => {
 							console.log(err)
 							this.$Message.error(err.response.data.message)
