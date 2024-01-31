@@ -95,8 +95,6 @@ class FaultManageView(Resource):
         fault = FaultInfo.query.get(fault_id)
         if fault:
             print(type(fault.start_time))
-            # fault.start_time = fault.start_time.strftime("%Y-%m-%d %H:%M:%S")
-            # fault.end_time = fault.end_time.strftime("%Y-%m-%d %H:%M:%S")
             return generate_response(data=fault_schema.dump(fault))
         else:
             raise DataNotFoundException(message="故障信息不存在")
@@ -193,4 +191,4 @@ api.add_resource(EncryptView, '/encrypt')
 api.add_resource(DecryptView, '/decrypt')
 api.add_resource(RandomPassGenView, '/random_pass')
 api.add_resource(FaultsManageView, '/faults')
-api.add_resource(FaultManageView, '/faults/<fault_id>')
+api.add_resource(FaultManageView, '/fault/<fault_id>')

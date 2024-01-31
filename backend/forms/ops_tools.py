@@ -31,6 +31,7 @@ class RandomPassForm(Form):
 
 
 class FaultInfoForm(Form):
+    faultId = StringField()
     faultName = StringField('故障名称')
     faultStatus = StringField('故障状态')
     faultLevel = StringField('故障级别')

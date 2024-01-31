@@ -13,13 +13,13 @@ from datetime import datetime
 
 
 class FaultSchema(ma.Schema):
-    # class Meta:
-    #     model = FaultInfo
-    #     fields = ('fault_id', 'falut_name', 'fault_status', 'fault_level', 'responsible', 'handler', 'start_time',
-    #               'end_time', 'cause_of_fault', 'summary_of_fault')
+    class Meta:
+        model = FaultInfo
+        fields = ('fault_id', 'fault_name', 'fault_status', 'fault_level', 'responsible', 'handler', 'start_time',
+                  'end_time', 'cause_of_fault', 'summary_of_fault')
 
     fault_id = fields.Integer()
-    falut_name = fields.String()
+    fault_name = fields.String()
     fault_status = fields.String()
     fault_level = fields.String()
     responsible = fields.String()

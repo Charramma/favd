@@ -4,7 +4,8 @@ import {
 	randomPassGen,
 	addFault,
   getFaults,
-  delFault
+  delFault,
+  editFault
 } from '@/api/ops_tools.js'
 
 export default {
@@ -99,6 +100,7 @@ export default {
 				})
 			})
 		},
+    // 新增故障信息
 		handleAddFault({
 			commit
 		}, faultinfo) {
@@ -113,6 +115,19 @@ export default {
 				})
 			})
 		},
+    // 编辑已有故障信息
+    handleEditFault ({commit}, faultinfo) {
+      return new Promise((resolve, reject) => {
+        editFault({
+        	faultinfo
+        }).then(res => {
+        	const data = res.data;
+        	resolve();
+        }).catch(err => {
+        	reject(err);
+        })
+      })
+    },
     // 获取所有故障信息
     handleGetFaults({ commit }, page) {
       return new Promise((resolve, reject) => {

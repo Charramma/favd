@@ -45,8 +45,19 @@ export const addFault = ({faultinfo}) => {
 		method: 'post'
 	})
 }
+// 编辑故障信息
+export const editFault = ({fault_id, faultinfo}) => {
+	const data = {
+		faultinfo
+	}
+	return axios.request({
+		url: `ops_tools/fault/${faultinfo.faultId}`,
+		data,
+		method: 'put'
+	})
+}
 
-// 获取故障信息
+// 获取所有故障信息
 export const getFaults = (page) => {
   return axios.request({
     url: 'ops_tools/faults',
@@ -58,7 +69,7 @@ export const getFaults = (page) => {
 // 删除故障信息
 export const delFault = (fault_id) => {
   return axios.request({
-    url: `ops_tools/faults/${fault_id}`,
+    url: `ops_tools/fault/${fault_id}`,
     method: 'delete'
   })
 }

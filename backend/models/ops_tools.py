@@ -14,7 +14,7 @@ class FaultInfo(db.Model):
     """故障管理-故障信息"""
     __tablename__ = "fault_info"
     fault_id = db.Column(db.Integer, primary_key=True, name='fault_id', autoincrement=True)
-    falut_name = db.Column(db.String(255), nullable=False, name='falut_name', comment="故障名称")
+    fault_name = db.Column(db.String(255), nullable=False, name='fault_name', comment="故障名称")
     fault_status = db.Column(db.String(20), nullable=False, name='fault_status', comment="故障状态")
     fault_level = db.Column(db.String(20), nullable=False, name='fault_level', comment="故障等级")
     responsible = db.Column(db.String(255), nullable=False, name='responsible', comment="责任人")
@@ -28,7 +28,7 @@ class FaultInfo(db.Model):
     def create_fault(cls, fault_name, fault_status, fault_level, responsible, handler, start_time, end_time,
                      cause_of_fault, summary_of_fault):
         fault = cls()
-        fault.falut_name = fault_name
+        fault.fault_name = fault_name
         fault.fault_status = fault_status
         fault.fault_level = fault_level
         fault.responsible = responsible
@@ -54,7 +54,7 @@ class FaultInfo(db.Model):
                      cause_of_fault, summary_of_fault):
         """修改故障信息时调用该函数，需要对日期格式进行处理"""
         fault = cls().query.get(fault_id)
-        fault.falut_name = fault_name
+        fault.fault_name = fault_name
         fault.fault_status = fault_status
         fault.fault_level = fault_level
         fault.responsible = responsible
