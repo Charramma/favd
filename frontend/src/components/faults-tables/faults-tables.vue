@@ -2,10 +2,10 @@
   <div>
     <!-- 搜索框及新建故障按钮 -->
     <div class="search-con search-con-top">
-      <Select v-model="searchKey" class="search-col" style="width: 200px;">
+      <Select clearable v-model="searchKey" class="search-col" style="width: 200px;">
         <Option v-for="item in searchTypes" :value="item.value" :key="item.value">{{ item.lable }}</Option>
       </Select>
-      <Input @on-change="handleClear" clearable placeholder="输入关键字搜索" class="search-input" v-model="searchValue"
+      <Input clearable placeholder="输入关键字搜索" class="search-input" v-model="searchValue"
         style="width: 200px;" />
       <Button class="search-btn" type="primary">搜索</Button>
 
