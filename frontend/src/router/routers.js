@@ -553,20 +553,20 @@ export default [{
 	  ]
 	},
 	{
-		path: '/join',
-		name: 'join',
+		path: '/test',
+		name: 'test',
 		component: Main,
 		meta: {
 			hideInBread: true
 		},
 		children: [{
-			path: 'join_page',
-			name: 'join_page',
+			path: 'test_page',
+			name: 'test_page',
 			meta: {
 				icon: '_qq',
-				title: 'QQ群'
+				title: '测试'
 			},
-			component: () => import('@/view/join-page.vue')
+			component: () => import('@/view/test/test.vue')
 		}]
 	},
 	{

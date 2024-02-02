@@ -10,6 +10,50 @@ from .extension import db
 from datetime import datetime
 
 
+class EventInfo(db.Model):
+    """事件管理-事件信息"""
+    __tablename__ = "event_info"
+    event_id = db.Column(db.Integer, primary_key=True, name='event_id', autoincrement=True)
+    event_name = db.Column(db.String(255), nullable=False, name='event_name', comment='事件名称')
+    event_status = db.Column(db.String(50), nullable=False, name='event_status', comment='事件状态')
+    event_level = db.Column(db.String(50), nullable=False, name='event_level', comment='事件等级')
+    handler = db.Column(db.String(255), nullable=False, name='handler', comment='事件处理人')
+    start_time = db.Column(db.DateTime, nullable=True, name='start_time', comment="开始时间")
+    end_time = db.Column(db.DateTime, nullable=True, name='end_time', comment="结束时间")
+
+    @classmethod
+    def create_event(cls, event_name, event_status, event_level, handler, start_time, end_time):
+        event = cls()
+        event.event_name = event_name
+        event.event_status = event_status
+        event.event_level = event_level
+        event.handler = handler
+
+        if start_time:
+            start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+            event.start_time = start_time
+
+        if end_time:
+            end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+            event.end_time = end_time
+
+    @classmethod
+    def change_event(cls, event_id, event_name, event_status, event_level, handler, start_time, end_time):
+        event = cls().query.get(event_id)
+        event.event_name = event_name
+        event.event_status = event_status
+        event.event_level = event_level
+        event.handler = handler
+
+        if start_time:
+            start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+            event.start_time = start_time
+
+        if end_time:
+            end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+            event.end_time = end_time
+
+
 class FaultInfo(db.Model):
     """故障管理-故障信息"""
     __tablename__ = "fault_info"

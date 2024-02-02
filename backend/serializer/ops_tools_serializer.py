@@ -6,7 +6,7 @@
 # @File: ops_tools_serializer.py
 # @Software: PyCharm
 
-from models.ops_tools import FaultInfo
+from models.ops_tools import FaultInfo, EventInfo
 from .extension import ma
 from marshmallow import fields
 from datetime import datetime
@@ -36,7 +36,27 @@ class FaultSchema(ma.Schema):
         return data
 
 
+class EventSchema(ma.Schema):
+    class Meta:
+        model = EventInfo
+        fields = ('event_id', 'event_name', 'event_status', 'event_level', 'handler', 'start_time', 'end_time')
+
+    event_id = fields.Integer()
+    event_name = fields.String()
+    event_status = fields.String()
+    event_level = fields.String()
+    handler = fields.String()
+    start_time = fields.String()
+    end_time = fields.String()
+
+    def post_dump(self, data, many, **kwargs):
+        for item in data:
+            item['start_time'] = item['start_time'].strftime("%Y-%m-%d %H:%M:%S") if item['start_time'] else None
+            item['end_time'] = item['end_time'].strftime("%Y-%m-%d %H:%M:%S") if item['end_time'] else None
+        return data
 
 
 fault_schema = FaultSchema()
 faults_schema = FaultSchema(many=True)
+event_schema = EventSchema()
+events_schema = EventSchema(many=True)

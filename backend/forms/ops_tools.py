@@ -51,6 +51,7 @@ class FaultInfoForm(Form):
             current_time = datetime.now()
             if self.startTime.data == 'NaN-NaN-NaN NaN:NaN:NaN': self.startTime.data = ""
             if self.endTime.data == "NaN-NaN-NaN NaN:NaN:NaN": self.endTime.data = ""
+
             if self.startTime.data and self.endTime.data:   # 如果开始时间和结束时间都有值，开始时间不能晚于结束时间，且均不能晚于当前时间
                 start_time = datetime.strptime(self.startTime.data, time_format)
                 end_time = datetime.strptime(self.endTime.data, time_format)

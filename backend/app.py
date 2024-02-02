@@ -27,5 +27,4 @@ def create_app(config=None):
     # 初始化蓝图
     router.init_app(app)
 
-
     return app

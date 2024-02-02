@@ -14,9 +14,9 @@ from tools.response import generate_response
 from forms.ops_tools import RandomPassForm, FaultInfoForm
 from tools.error_code import ArgsTypeException, FormValidateException, DataNotFoundException, Success, \
     DatabaseOperationException
-from models.ops_tools import FaultInfo
+from models.ops_tools import FaultInfo, EventInfo
 from models.extension import db
-from serializer.ops_tools_serializer import fault_schema, faults_schema
+from serializer.ops_tools_serializer import fault_schema, faults_schema, event_schema, events_schema
 import string
 import random
 import math
@@ -187,8 +187,27 @@ class FaultsManageView(Resource):
             return jsonify({"message": result})
 
 
+# 事件管理
+class EventManageView(Resource):
+    def get(self, event_id):
+        """获取单个事件信息"""
+        event = EventInfo.query.get(event_id)
+        if event:
+            return generate_response(data=event_schema.dump(event))
+        else:
+            raise DataNotFoundException(message="事件信息不存在")
+
+
+class EventsManageView(Resource):
+    def get(self):
+        events = EventInfo.query.all()
+        return generate_response(data=events_schema.dump(events))
+
+
 api.add_resource(EncryptView, '/encrypt')
 api.add_resource(DecryptView, '/decrypt')
 api.add_resource(RandomPassGenView, '/random_pass')
 api.add_resource(FaultsManageView, '/faults')
 api.add_resource(FaultManageView, '/fault/<fault_id>')
+api.add_resource(EventsManageView, '/events')
+api.add_resource(EventManageView, '/event/<event_id>')
