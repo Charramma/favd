@@ -396,7 +396,7 @@ export default [{
           title: '事件管理',
           icon: 'ios-paper-outline'
         },
-        component: () => import('@/view/newrouter/lalala.vue')
+        component: () => import('@/view/ops_tools/events_manage.vue')
       },
       {
         path: 'fault_manager',

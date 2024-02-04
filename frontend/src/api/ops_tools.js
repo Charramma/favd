@@ -33,7 +33,9 @@ export const randomPassGen = ({character, passLength}) => {
 		method: 'post'
 	})
 }
-
+/**
+* 故障管理
+*/
 // 新建故障信息
 export const addFault = ({faultinfo}) => {
 	const data = {
@@ -71,5 +73,32 @@ export const delFault = (fault_id) => {
   return axios.request({
     url: `ops_tools/fault/${fault_id}`,
     method: 'delete'
+  })
+}
+
+/**
+* 事件管理
+*/
+// 获取所有事件信息
+export const getEvents = (page) => {
+  return axios.request({
+    url: 'ops_tools/events',
+    params: page,
+    method: 'get'
+  })
+}
+// 删除事件信息
+export const delEvent = (event_id) => {
+  return axios.request({
+    url: `ops_tools/event/${event_id}`,
+    method: 'delete'
+  })
+}
+// 新增事件信息
+export const addEvent = (data) => {
+  return axios.request({
+  	url: `ops_tools/events`,
+  	data,
+  	method: 'post'
   })
 }

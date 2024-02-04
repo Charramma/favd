@@ -152,7 +152,6 @@
         insideTableHeader: [{
             title: '故障名称',
             key: 'fault_name',
-            sortable: true,
             align: "center"
           },
           {
@@ -172,7 +171,6 @@
           {
             title: '故障责任人',
             key: 'responsible',
-            sortable: true,
             align: "center"
           },
           {

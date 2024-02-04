@@ -37,6 +37,12 @@ class EventInfo(db.Model):
             end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
             event.end_time = end_time
 
+        try:
+            db.session.add(event)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+
     @classmethod
     def change_event(cls, event_id, event_name, event_status, event_level, handler, start_time, end_time):
         event = cls().query.get(event_id)
@@ -52,6 +58,11 @@ class EventInfo(db.Model):
         if end_time:
             end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
             event.end_time = end_time
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
 
 
 class FaultInfo(db.Model):

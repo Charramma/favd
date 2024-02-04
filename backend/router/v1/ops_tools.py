@@ -11,7 +11,7 @@ from tools.nestable_blueprint import NestableBlueprint
 from flask_restful import Api, Resource
 from flask import current_app, request, jsonify
 from tools.response import generate_response
-from forms.ops_tools import RandomPassForm, FaultInfoForm
+from forms.ops_tools import RandomPassForm, FaultInfoForm, EventInfoForm
 from tools.error_code import ArgsTypeException, FormValidateException, DataNotFoundException, Success, \
     DatabaseOperationException
 from models.ops_tools import FaultInfo, EventInfo
@@ -181,10 +181,10 @@ class FaultsManageView(Resource):
                 return generate_response(data={"message": "提交成功"})
             except Exception as e:
                 print(e)
-                return jsonify({"message": "插入数据库失败"})
+                raise DatabaseOperationException(message="数据插入失败")
         else:
             result = form.errors
-            return jsonify({"message": result})
+            raise DatabaseOperationException(message=result)
 
 
 # 事件管理
@@ -197,11 +197,62 @@ class EventManageView(Resource):
         else:
             raise DataNotFoundException(message="事件信息不存在")
 
+    def delete(self, event_id):
+        """删除单个事件信息"""
+        event = EventInfo.query.get(event_id)
+        if event:
+            try:
+                db.session.delete(event)
+                db.session.commit()
+                return generate_response(message="删除成功", data=fault_schema.dump(event))
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+                raise DatabaseOperationException(message="删除事件信息失败")
+        else:
+            raise DataNotFoundException(message="事件不存在")
+
 
 class EventsManageView(Resource):
     def get(self):
-        events = EventInfo.query.all()
-        return generate_response(data=events_schema.dump(events))
+        """获取所有事件信息"""
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
+
+        # 获取分页数据，一次10条
+        events_info = EventInfo.query.paginate(page=page, per_page=per_page, error_out=False)
+        data_count = EventInfo.query.count()  # 数据总量
+        total_page = math.ceil(data_count / per_page)  # 总页码数
+
+        return generate_response(
+            data={"events_info": events_schema.dump(events_info), "count": data_count, "total_page": total_page})
+
+    def post(self):
+        """新增事件"""
+        data = request.json
+
+        if not data:
+            raise ArgsTypeException(message="参数异常")
+
+        form = EventInfoForm(data=data)
+        if form.validate():
+            try:
+                EventInfo.create_event(
+                    event_name=form.eventName.data,
+                    event_level=form.eventLevel.data,
+                    event_status=form.eventStatus.data,
+                    handler=form.handler.data,
+                    start_time=form.startTime.data,
+                    end_time=form.endTime.data
+                )
+                print('提交成功')
+                return generate_response(data={"message": "提交成功"})
+            except Exception as e:
+                print(e)
+                raise DatabaseOperationException(message="数据插入失败")
+        else:
+            result = form.errors
+            raise DatabaseOperationException(message=result)
 
 
 api.add_resource(EncryptView, '/encrypt')
