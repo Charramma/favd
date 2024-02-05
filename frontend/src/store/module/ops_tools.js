@@ -52,7 +52,7 @@ export default {
     },
     setEventTotalPage(state, eventTotalPage) {
       state.eventTotalPage = eventTotalPage;
-    }
+    },
   },
   getters: {
     getCiphertext: state => state.ciphertext,

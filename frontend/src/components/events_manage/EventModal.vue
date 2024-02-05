@@ -46,7 +46,7 @@
   export default {
     name: 'ModalView',
     props: {
-      visible: Boolean // 对话框是否可见
+      visible: Boolean, // 对话框是否可见
     },
     data() {
       return {
@@ -107,12 +107,12 @@
             this.dataForm.startTime = this.formatDate(this.dataForm.startTime);
             this.dataForm.endTime = this.formatDate(this.dataForm.endTime);
             this.$emit('getModalData', this.dataForm)
-            // this.$refs[name].resetFields();
           } else {
             this.$Message.error("缺少必要参数！")
           }
         })
-      }
+      },
+
     }
   }
 </script>

@@ -6,7 +6,7 @@
         @turnPage="handlePageChange"></table-view>
     </Card>
 
-    <ModalView :visible="modalVisible" @getModalData="updateEvent"></ModalView>
+    <ModalView :visible="modalVisible" @getModalData="updateEvent" ref="modalView"></ModalView>
   </div>
 </template>
 
@@ -95,7 +95,8 @@
         tableData: [],
         tablePage: 1,
         tableDataCount: "",
-        modalVisible: false
+        modalVisible: false,
+        currentData: {}
       }
     },
     mounted() {
@@ -133,20 +134,33 @@
           }
         })
       },
+      // editTableData(index) {
+      //   const data = {
+      //     'eventId': this.tableData[index].event_id,
+      //     'eventName': this.tableData[index].event_name,
+      //     'eventStatus': this.tableData[index].event_status,
+      //     'eventLevel': this.tableData[index].event_level,
+      //     'handler': this.tableData[index].handler,
+      //     'startTime': this.tableData[index].start_time,
+      //     'endTime': this.tableData[index].end_time
+      //   }
+      //   this.$store.commit('setEventFormData', data);
+      //   this.openModal();
+      // },
       // 新增或修改数据
       updateEvent(value) {
         if (value.event_id) {
-          console.log('修改数据')
+          this.$Message.success('修改成功');
         } else {
           this.handleAddEvent(value).then(() => {
             this.$Message.success('添加新事件成功')
-            // 这里还未完成，需要在请求完成后清空Modal
+            this.getTableData();
+            this.modalVisible = false;
           }).catch(err => {
             this.$Message.error(err);
             console.error('添加新事件失败', err);
           })
         }
-        this.modalVisible = false;
       },
       openModal(value) {
         this.modalVisible = false;

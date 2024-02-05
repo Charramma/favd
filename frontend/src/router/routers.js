@@ -552,23 +552,23 @@ export default [{
 	    }
 	  ]
 	},
-	{
-		path: '/test',
-		name: 'test',
-		component: Main,
-		meta: {
-			hideInBread: true
-		},
-		children: [{
-			path: 'test_page',
-			name: 'test_page',
-			meta: {
-				icon: '_qq',
-				title: '测试'
-			},
-			component: () => import('@/view/test/test.vue')
-		}]
-	},
+	// {
+	// 	path: '/test',
+	// 	name: 'test',
+	// 	component: Main,
+	// 	meta: {
+	// 		hideInBread: true
+	// 	},
+	// 	children: [{
+	// 		path: 'test_page',
+	// 		name: 'test_page',
+	// 		meta: {
+	// 			icon: '_qq',
+	// 			title: '测试'
+	// 		},
+	// 		component: () => import('@/view/test/test.vue')
+	// 	}]
+	// },
 	{
 		path: '/message',
 		name: 'message',
