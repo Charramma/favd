@@ -9,6 +9,9 @@
         <DropdownItem name="message">
           消息中心<Badge style="margin-left: 10px" :count="messageUnreadCount"></Badge>
         </DropdownItem>
+        <DropdownItem name="passwordUpdate">
+          修改密码
+        </DropdownItem>
         <DropdownItem name="logout">退出登录</DropdownItem>
       </DropdownMenu>
     </Dropdown>
@@ -46,11 +49,18 @@ export default {
         name: 'message_page'
       })
     },
+    passwordUpdate () {
+      this.$router.push({
+        name: 'change_password_page'
+      })
+    },
     handleClick (name) {
       switch (name) {
         case 'logout': this.logout()
           break
         case 'message': this.message()
+          break
+        case 'passwordUpdate': this.passwordUpdate()
           break
       }
     }

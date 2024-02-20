@@ -9,7 +9,7 @@
 from wtforms import Form, StringField, PasswordField
 from wtforms.validators import DataRequired, email, length, ValidationError
 from models.user import UserProfile
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from tools.error_code import AuthorizedException
 import re
 
@@ -29,7 +29,7 @@ class LoginForm(Form):
             # 如果用户存在，检查输入的密码与库中密码是否一致
             return user
         else:
-            raise AuthorizedException(message="用户名或密码错误")
+            raise AuthorizedException(message="用户名或密码输入错误")
 
 
 # 注册表单类
@@ -46,5 +46,16 @@ class RegisterForm(Form):
 
     def validate_password(self, value):
         """验证密码是否同时包含大小写字母、数字和特殊符号"""
+        if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$', value.data):
+            raise ValidationError('密码必须包含至少8个字符，其中包括一个字母、一个数字和一个特殊字符。')
+
+
+# 修改密码表单类
+class ChangePasswordForm(Form):
+    old_password = PasswordField('旧密码', validators=[DataRequired(message='旧密码不能为空')])
+    new_password = PasswordField('新密码', validators=[DataRequired(message='新密码不能为空'), length(min=8, max=16, message="密码长度必须在8到16位之间")])
+
+    def validate_new_password(self, value):
+        """验证新密码是否符合要求"""
         if not re.match(r'^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$', value.data):
             raise ValidationError('密码必须包含至少8个字符，其中包括一个字母、一个数字和一个特殊字符。')

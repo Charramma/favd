@@ -549,24 +549,42 @@ export default [{
 	// 		component: () => import('@/view/test/test.vue')
 	// 	}]
 	// },
-	// {
-	// 	path: '/message',
-	// 	name: 'message',
-	// 	component: Main,
-	// 	meta: {
-	// 		hideInBread: true,
-	// 		hideInMenu: true
-	// 	},
-	// 	children: [{
-	// 		path: 'message_page',
-	// 		name: 'message_page',
-	// 		meta: {
-	// 			icon: 'md-notifications',
-	// 			title: '消息中心'
-	// 		},
-	// 		component: () => import('@/view/single-page/message/index.vue')
-	// 	}]
-	// },
+	{
+		path: '/message',
+		name: 'message',
+		component: Main,
+		meta: {
+			hideInBread: true,
+			hideInMenu: true
+		},
+		children: [{
+			path: 'message_page',
+			name: 'message_page',
+			meta: {
+				icon: 'md-notifications',
+				title: '消息中心'
+			},
+			component: () => import('@/view/single-page/message/index.vue')
+		}]
+	},
+  {
+  	path: '/change_password',
+  	name: 'change_password',
+  	component: Main,
+  	meta: {
+  		hideInBread: true,
+  		hideInMenu: true
+  	},
+  	children: [{
+  		path: 'change_password_page',
+  		name: 'change_password_page',
+  		meta: {
+  			icon: 'md-key',
+  			title: '修改密码'
+  		},
+  		component: () => import('_c/change-password/change-password.vue')
+  	}]
+  },
 	{
 		path: '/argu',
 		name: 'argu',

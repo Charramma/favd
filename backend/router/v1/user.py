@@ -9,11 +9,13 @@
 from tools.nestable_blueprint import NestableBlueprint
 from flask_restful import Api, Resource
 from flask import request, g, jsonify
-from tools.error_code import ArgsTypeException, FormValidateException
-from forms.user import LoginForm, RegisterForm
+from models.extension import db
+from tools.error_code import ArgsTypeException, FormValidateException, AuthorizedException
+from forms.user import LoginForm, RegisterForm, ChangePasswordForm
 from tools.authorize import create_token, auth
 from tools.response import generate_response
 from models.user import UserProfile
+from werkzeug.security import check_password_hash
 from serializer.user_serializer import user_schema, users_schema
 from tools.handler import default_error_handler
 
@@ -46,6 +48,31 @@ class UserView(Resource):
         return generate_response(data=user_schema.dump(user))
 
 
+class ChangePasswordView(Resource):
+    @auth.login_required
+    def put(self):
+        """修改用户密码"""
+        user = UserProfile.query.get(g.user["uid"])
+        data = request.json
+        if not data:
+            raise ArgsTypeException(message="参数异常")
+        form = ChangePasswordForm(data=data)
+        if form.validate():
+            if not user:
+                raise AuthorizedException(message="用户不存在")
+            elif user and check_password_hash(user.password, form.old_password.data):
+                user.password = form.new_password.data  # ORM类中会将明文密码转换为hash值
+                db.session.commit()
+                return generate_response(message="密码修改成功")
+            else:
+                raise AuthorizedException(message="输入的旧密码与实际密码不一致")
+        else:
+            result = form.errors
+            raise FormValidateException(message=result)
+
+
+
+
 class RegisterView(Resource):
     def post(self):
         """用户注册"""
@@ -66,3 +93,4 @@ class RegisterView(Resource):
 api.add_resource(RegisterView, '/register')
 api.add_resource(LoginView, '/login')
 api.add_resource(UserView, '/')
+api.add_resource(ChangePasswordView, '/password')
