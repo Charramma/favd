@@ -22,3 +22,4 @@ db = SQLAlchemy(metadata=MetaData(naming_convention=naming_convention))
 
 from . import user
 from . import ops_tools
+from . import cmdb
