@@ -47,6 +47,19 @@ export const logout = (token) => {
   })
 }
 
+// 修改密码
+export const changePassword = ({old_password, new_password}) => {
+  const data = {
+    old_password,
+    new_password
+  }
+  return axios.request({
+    url: 'user/password',
+    data,
+    method: 'put'
+  })
+}
+
 export const getUnreadCount = () => {
   return axios.request({
     url: 'message/count',

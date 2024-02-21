@@ -1,7 +1,7 @@
 <template>
   <Card>
     <h1 style="margin-bottom: 10px;">修改密码</h1>
-    <Form ref="changePasswordForm" :model="form" :rules="rules" style="width: 300px" label-width='80'>
+    <Form ref="changePasswordForm" :model="form" :rules="rules" style="width: 400px" label-width='100'>
       <FormItem prop="old_password" label="当前密码">
         <Input type="password" v-model="form.old_password" placeholder="请输入当前密码" maxlength='16'></Input>
       </FormItem>
@@ -19,6 +19,9 @@
 </template>
 
 <script>
+  import {changePassword} from '@/api/user.js'
+  import { mapActions } from 'vuex'
+
   export default {
     name: 'ChangePassword',
     props: {
@@ -89,8 +92,19 @@
       }
     },
     methods: {
-      handleSubmit() {
-
+      ...mapActions([
+        'handleLogOut'
+      ]),
+      // 声明为异步函数
+      async handleSubmit() {
+        const { old_password, new_password } = this.form;
+        try {
+          await changePassword({ old_password, new_password });
+          this.$Message.success('密码修改成功，请用新密码重新登录');
+          this.logout();
+        } catch (error) {
+          this.$Message.error('系统异常，密码修改失败');
+        }
       },
       // 检测二次输入的密码是否正确
       validateNewPasswordCheck(rule, value, callback) {
@@ -99,7 +113,15 @@
         } else {
           callback();
         }
-      }
+      },
+      // 退出登录状态并进入登录页面
+      logout () {
+        this.handleLogOut().then(() => {
+          this.$router.push({
+            name: 'login'
+          })
+        })
+      },
     }
   }
 </script>
