@@ -142,7 +142,7 @@ export default [{
           icon: 'md-cube',
           title: '主机管理'
         },
-        component: () => import('@/view/newrouter/lalala.vue')
+        component: () => import('@/view/cmdb/host.vue')
       },
       {
         path: 'asset_db',
@@ -160,7 +160,7 @@ export default [{
           icon: 'ios-albums',
           title: 'IDC管理'
         },
-        component: () => import('@/view/newrouter/lalala.vue')
+        component: () => import('@/view/cmdb/idc.vue')
       },
       {
         path: 'operational_audit',

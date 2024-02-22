@@ -9,6 +9,7 @@
 from tools.nestable_blueprint import NestableBlueprint
 from .user import user_bp
 from .ops_tools import ops_tools_bp
+from .cmdb import cmdb_bp
 
 version = 'v1'
 
@@ -16,3 +17,4 @@ v1_bp = NestableBlueprint(version, __name__, url_prefix='/api/v1/')
 
 v1_bp.register_blueprint(user_bp)
 v1_bp.register_blueprint(ops_tools_bp)
+v1_bp.register_blueprint(cmdb_bp)

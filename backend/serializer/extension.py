@@ -12,3 +12,4 @@ ma = Marshmallow()
 
 from . import user_serializer
 from . import ops_tools_serializer
+from . import cmdb_serializer

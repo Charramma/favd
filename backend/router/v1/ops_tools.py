@@ -230,7 +230,6 @@ class EventsManageView(Resource):
     def post(self):
         """新增事件"""
         data = request.json
-        print(data)
 
         if not data:
             raise ArgsTypeException(message="参数异常")
