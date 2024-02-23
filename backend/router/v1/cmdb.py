@@ -13,7 +13,8 @@ from tools.response import generate_response
 from models.extension import db
 from models.cmdb import IDC
 from serializer.cmdb_serializer import idc_schema, idcs_schema
-from tools.error_code import DataNotFoundException, DatabaseOperationException, ArgsTypeException
+from forms.cmdb import IDCForm
+from tools.error_code import DataNotFoundException, DatabaseOperationException, ArgsTypeException, FormValidateException
 
 cmdb_bp = NestableBlueprint('cmdb_v1', __name__, url_prefix='cmdb')
 api = Api(cmdb_bp)
@@ -60,27 +61,30 @@ class IdcsView(Resource):
         if not data:
             raise ArgsTypeException(message="参数异常")
 
-        # 暂时省略表单验证
-
-        idc = IDC(
-            idc_name=data['idc_name'],
-            region=data['region'],
-            idc_supplier=data['idc_supplier'],
-            administrator=data['administrator'],
-            administrator_phone=data['administrator_phone'],
-            administrator_email=data['administrator_email'],
-            bandwidth=data['bandwidth'],
-            ip_address_range=data['ip_address_range'],
-            description=data['description']
-        )
-        try:
-            db.session.add(idc)
-            db.session.commit()
-            return generate_response(message="添加成功", data=idc_schema.dump(idc))
-        except Exception as e:
-            print(e)
-            db.session.rollback()
-            raise DatabaseOperationException(message="新增IDC信息失败")
+        form = IDCForm(data=data)
+        if form.validate():
+            idc = IDC(
+                idc_name=form.idc_name.data,
+                region=form.region.data,
+                idc_supplier=form.idc_supplier.data,
+                administrator=form.administrator.data,
+                administrator_phone=form.administrator_phone.data,
+                administrator_email=form.administrator_email.data,
+                bandwidth=form.bandwidth.data,
+                ip_address_range=form.ip_address_range.data,
+                description=form.description.data
+            )
+            try:
+                db.session.add(idc)
+                db.session.commit()
+                return generate_response(message="添加成功", data=idc_schema.dump(idc))
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+                raise DatabaseOperationException(message="新增IDC信息失败")
+        else:
+            result = form.errors
+            raise FormValidateException(message=result)
 
 
 
