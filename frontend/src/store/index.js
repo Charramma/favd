@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 import user from './module/user'
 import app from './module/app'
 import ops_tools from './module/ops_tools'
+import cmdb from './module/cmdb'
 
 Vue.use(Vuex)
 
@@ -20,6 +21,7 @@ export default new Vuex.Store({
   modules: {
     user,
     app,
-		ops_tools
+		ops_tools,
+    cmdb
   }
 })

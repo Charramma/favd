@@ -15,6 +15,7 @@ from models.cmdb import IDC
 from serializer.cmdb_serializer import idc_schema, idcs_schema
 from forms.cmdb import IDCForm
 from tools.error_code import DataNotFoundException, DatabaseOperationException, ArgsTypeException, FormValidateException
+import math
 
 cmdb_bp = NestableBlueprint('cmdb_v1', __name__, url_prefix='cmdb')
 api = Api(cmdb_bp)
@@ -52,8 +53,15 @@ class IdcView(Resource):
 class IdcsView(Resource):
     def get(self):
         """获取所有idc信息"""
-        idcs = IDC.query.all()
-        return generate_response(idcs_schema.dump(idcs))
+        page = request.args.get('page', 1, type=int)
+        per_page = 10
+
+        # 获取分页数据，一次10条
+        idc_info = IDC.query.paginate(page=page, per_page=per_page, error_out=False)
+        count = IDC.query.count()  # 数据总量
+        total_page = math.ceil(count/per_page)  # 总页码
+
+        return generate_response(data={"idc_info": idcs_schema.dump(idc_info), "count": count, "total_page": total_page})
 
     def post(self):
         data = request.json
@@ -85,8 +93,6 @@ class IdcsView(Resource):
         else:
             result = form.errors
             raise FormValidateException(message=result)
-
-
 
 
 api.add_resource(IdcView, '/idc/<idc_id>')
