@@ -1,8 +1,8 @@
 <template>
   <div>
     <Card>
-      <search-bar></search-bar>
-      <idc-table @getIdcData="handleGetIdcData" @ChangePage="HandleChangePage" @delIdcData="handleDelIdc"
+      <search-bar @searchIdc="handleSearchIdc"></search-bar>
+      <idc-table @getIdcData="handleGetIdcData" @ChangePage="handleChangePage" @delIdcData="handleDelIdc"
         @updateIdcData="getEditableData"></idc-table>
       <modal-view @addIdcData="handleAddIdc" @updateIdcData="handleUpdateIdc"></modal-view>
     </Card>
@@ -34,7 +34,8 @@
       ...mapActions(['handleGetIdcInfo', 'handleDelIdcInfo', 'handleAddIdcInfo', 'handleUpdateIdcInfo']),
 
       // 获取表格数据
-      handleGetIdcData(page) {
+      handleGetIdcData(page, search_key="") {
+        const params = {page, search_key};
         this.handleGetIdcInfo(page).then(() => {
           console.log("Get IDC info success.");
         }).catch(err => {
@@ -43,7 +44,7 @@
         });
       },
       // 表格翻页
-      HandleChangePage(current_page) {
+      handleChangePage(current_page) {
         this.handleGetIdcData(current_page);
       },
       // 新增一条IDC数据
@@ -72,7 +73,6 @@
       getEditableData(idc_info) {
         this.$store.commit('setIdcForm', idc_info); // 用需要修改的数据填充对话框内嵌表单
         this.$store.commit('setIdcModalStatus', true); // 打开对话框
-        // this.handleGetIdcData(current_page);
       },
       // 修改一条idc数据
       handleUpdateIdc(idc_info) {
@@ -83,11 +83,15 @@
         }).catch(err => {
           this.$Message.error("修改IDC信息失败：", err);
         })
+      },
+      // 根据关键字搜索IDC
+      handleSearchIdc(search_key) {
+        console.log(search_key);
       }
     },
     // 挂载组件时获取一次表格数据
     mounted() {
-      this.handleGetIdcData();
+      this.handleGetIdcData(this.$store.getters.getIdcTableCurrentPage);
     }
   }
 </script>

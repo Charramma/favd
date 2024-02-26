@@ -13,6 +13,7 @@ export default {
     idc_table_total_page: '', // idc表格总页数
     idc_table_current_page: 1, // idc表格当前页码
     idc_modal_status: false, // 是否显示idc信息对话框
+    idc_search_key: "", // 查询条件
     idc_Form: { // 新增idc信息 对话框内嵌表单
       idc_name: "",
       region: "",
@@ -31,7 +32,8 @@ export default {
     getIdcTableTotalPage: state => state.idc_table_total_page,
     getIdcTableCurrentPage: state => state.idc_table_current_page,
     getIdcModalStatus: state => state.idc_modal_status,
-    getIdcForm: state => state.idc_Form
+    getIdcForm: state => state.idc_Form,
+    getIdcSearchKey: state => state.idc_search_key
   },
   mutations: {
     setIdcTableData(state, value) {
@@ -51,6 +53,9 @@ export default {
     },
     setIdcForm(state, value) {
       state.idc_Form = value;
+    },
+    setIdcSearchKey(state, value) {
+      state.idc_search_key = value;
     }
   },
   actions: {
@@ -58,9 +63,7 @@ export default {
       commit
     }, page) {
       return new Promise((resolve, reject) => {
-        getIdcInfo({
-          page
-        }).then(res => {
+        getIdcInfo({page}).then(res => {
           const data = res.data;
           commit('setIdcTableData', data.data.idc_info);
           commit('setIdcTableDataCount', data.data.count);
