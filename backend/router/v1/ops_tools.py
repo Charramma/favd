@@ -216,8 +216,10 @@ class EventManageView(Resource):
 class EventsManageView(Resource):
     def get(self):
         """获取所有事件信息"""
+        # 当前页码和每页数据量
         page = request.args.get('page', 1, type=int)
         per_page = 10
+
 
         # 获取分页数据，一次10条
         events_info = EventInfo.query.paginate(page=page, per_page=per_page, error_out=False)

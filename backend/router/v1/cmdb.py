@@ -11,6 +11,7 @@ from flask_restful import Api, Resource
 from flask import current_app, request, jsonify
 from tools.response import generate_response
 from models.extension import db
+from sqlalchemy import or_
 from models.cmdb import IDC
 from serializer.cmdb_serializer import idc_schema, idcs_schema
 from forms.cmdb import IDCForm
@@ -32,7 +33,33 @@ class IdcView(Resource):
 
     def put(self, idc_id):
         """编辑已有idc信息"""
-        pass
+        data = request.json
+        if not data:
+            raise ArgsTypeException(message="参数异常")
+        form = IDCForm(data=data)
+        if form.validate():
+            try:
+                idc = IDC.query.get(idc_id)
+                print(idc)
+                idc.idc_name = form.idc_name.data
+                idc.region = form.region.data
+                idc.idc_supplier = form.idc_supplier.data
+                idc.administrator = form.administrator.data
+                idc.administrator_phone = form.administrator_phone.data
+                idc.administrator_email = form.administrator_email.data
+                idc.bandwidth = form.bandwidth.data
+                idc.ip_address_range = form.ip_address_range.data
+                idc.description = form.description.data
+                db.session.commit()
+                return generate_response(message="修改IDC信息成功")
+            except Exception as e:
+                print(e)
+                db.session.rollback()
+                raise DatabaseOperationException(message="修改IDC信息失败")
+        else:
+            result = form.errors
+            raise FormValidateException(message=result)
+
 
     def delete(self, idc_id):
         """根据id删除指定idc信息"""
@@ -53,11 +80,21 @@ class IdcView(Resource):
 class IdcsView(Resource):
     def get(self):
         """获取所有idc信息"""
+        # 当前页码和每页显示的数据条数
         page = request.args.get('page', 1, type=int)
         per_page = 10
 
+        # 查询关键字（对idc_name进行模糊查询)
+        key = request.args.get('key', '', type=str)
+
+        query = IDC.query
+
+        # 如果存在查询条件，对idc_name进行模糊查询
+        if key:
+            query = query.filter(or_(IDC.idc_name.like(f'%{key}%'), IDC.idc_name.ilike(f'%{key}%')))
+
         # 获取分页数据，一次10条
-        idc_info = IDC.query.paginate(page=page, per_page=per_page, error_out=False)
+        idc_info = query.paginate(page=page, per_page=per_page, error_out=False)
         count = IDC.query.count()  # 数据总量
         total_page = math.ceil(count/per_page)  # 总页码
 
@@ -68,7 +105,6 @@ class IdcsView(Resource):
 
         if not data:
             raise ArgsTypeException(message="参数异常")
-
         form = IDCForm(data=data)
         if form.validate():
             idc = IDC(

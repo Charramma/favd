@@ -21,3 +21,20 @@ export const delIdcInfo = (idc_id) => {
     method: 'delete'
   })
 }
+
+export const addIdcInfo = (data) => {
+  return axios.request({
+    url: 'cmdb/idc',
+    data,
+    method: 'post'
+  })
+}
+
+export const updateIdcInfo = (data) => {
+  const idc_id = data.idc_id;
+  return axios.request({
+    url: `cmdb/idc/${idc_id}`,
+    data,
+    method: 'put'
+  })
+}

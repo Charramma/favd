@@ -1,12 +1,15 @@
 <template>
   <div>
     <Table border :columns="table_columns" :data="table_data"></Table>
-    <Page :model-value="table_page" :total="table_data_count" show-total @on-change="PageChange" style="margin-top: 10px;"></Page>
+    <Page :model-value="table_page" :total="table_data_count" show-total @on-change="PageChange"
+      style="margin-top: 10px;"></Page>
   </div>
 </template>
 
 <script>
-  import { mapActions } from 'vuex';
+  import {
+    mapActions
+  } from 'vuex';
 
   export default {
     name: 'IdcTable',
@@ -121,16 +124,12 @@
 
       // 向后端发送请求获取idc信息
       getIdcInfo(page) {
-        this.handleGetIdcInfo(page).then(() => {
-          console.log("获取IDC信息成功")
-        }).catch(err => {
-          this.$Message.error(err);
-          console.error("获取IDC信息失败: ", err);
-        });
+        this.$emit('getIdcData', page);
       },
       // 编辑已有idc信息
-      edit() {
-
+      edit(index) {
+        const data = this.table_data[index];
+        this.$emit('updateIdcData', data);
       },
       // 删除已有idc信息
       del(index) {
@@ -138,25 +137,16 @@
           title: '确定要删除吗？',
           width: '20px',
           onOk: () => {
-            this.handleDelIdcInfo(this.table_data[index].idc_id).then(() => {
-              this.$Message.success('删除IDC信息成功');
-              this.getIdcInfo();
-            }).catch(err => {
-              this.$Message.error(err);
-              console.error('删除IDC信息失败', err);
-            })
+            this.$emit('delIdcData', this.table_data[index].idc_id);
           }
         })
       },
       // 翻页时调用的方法
       PageChange(page) {
         this.table_page = page;
-        this.getIdcInfo(this.table_page);
+        this.$store.commit('setIdcTableCurrentPage', page);
+        this.$emit('ChangePage', page);
       }
-    },
-    mounted() {
-      // 挂载组件时调用vuex actions的方法获取idc信息
-      this.getIdcInfo(this.table_page);
     }
   }
 </script>

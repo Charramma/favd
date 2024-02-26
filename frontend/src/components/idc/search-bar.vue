@@ -11,7 +11,8 @@
     name: 'SearchBar',
     methods: {
       openModal() {
-        this.$store.commit('setIdcModalStatus', true)
+        this.$store.commit('setIdcForm', {}); // 通过新建IDC按钮打开对话框前，先清空对话框
+        this.$store.commit('setIdcModalStatus', true);
       }
     }
   }
