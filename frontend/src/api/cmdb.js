@@ -1,10 +1,10 @@
 import axios from '@/libs/api.request'
 
 // 获取所有IDC信息
-export const getIdcInfo = (page) => {
+export const getIdcInfo = ({key, page}) => {
   return axios.request({
     url: 'cmdb/idc',
-    params: page,
+    params: {key, page},
     method: 'get'
   })
 }

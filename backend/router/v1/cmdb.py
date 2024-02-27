@@ -95,7 +95,7 @@ class IdcsView(Resource):
 
         # 获取分页数据，一次10条
         idc_info = query.paginate(page=page, per_page=per_page, error_out=False)
-        count = IDC.query.count()  # 数据总量
+        count = query.count()  # 数据总量
         total_page = math.ceil(count/per_page)  # 总页码
 
         return generate_response(data={"idc_info": idcs_schema.dump(idc_info), "count": count, "total_page": total_page})

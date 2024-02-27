@@ -34,9 +34,8 @@
       ...mapActions(['handleGetIdcInfo', 'handleDelIdcInfo', 'handleAddIdcInfo', 'handleUpdateIdcInfo']),
 
       // 获取表格数据
-      handleGetIdcData(page, search_key="") {
-        const params = {page, search_key};
-        this.handleGetIdcInfo(page).then(() => {
+      handleGetIdcData({key, page}) {
+        this.handleGetIdcInfo({key, page}).then(() => {
           console.log("Get IDC info success.");
         }).catch(err => {
           this.$Message.error(err);
@@ -45,14 +44,17 @@
       },
       // 表格翻页
       handleChangePage(current_page) {
-        this.handleGetIdcData(current_page);
+        const search_key = this.$store.getters.getIdcSearchKey;
+        this.handleGetIdcData({key: search_key, page: current_page});
       },
       // 新增一条IDC数据
       handleAddIdc(value) {
         const data = this.$store.getters.getIdcForm;
         this.handleAddIdcInfo(data).then(() => {
           this.$Message.success('添加成功');
-          this.handleGetIdcData();
+          this.$store.commit('setIdcTableCurrentPage', 1);
+          this.$store.commit('setIdcSearchKey', '');
+          this.handleGetIdcData({key: '', page: 1});
         }).catch(err => {
           this.$Message.error(err);
           console.error("添加IDC信息失败：", err);
@@ -60,10 +62,13 @@
       },
       // 删除一条IDC数据
       handleDelIdc(idc_id) {
+        const search_key = this.$store.getters.getIdcSearchKey;
         const current_page = this.$store.getters.getIdcTableCurrentPage;
         this.handleDelIdcInfo(idc_id).then(() => {
           this.$Message.success('删除IDC信息成功');
-          this.handleGetIdcData(current_page);
+          this.$store.commit('setIdcTableCurrentPage', 1);
+          this.$store.commit('setIdcSearchKey', '');
+          this.handleGetIdcData({key: '', page: 1});
         }).catch(err => {
           this.$Message.error(err);
           console.error('删除IDC信息失败', err);
@@ -79,19 +84,21 @@
         const current_page = this.$store.getters.getIdcTableCurrentPage;
         this.handleUpdateIdcInfo(idc_info).then(() => {
           this.$Message.success('修改成功');
-          this.handleGetIdcData(current_page);
+          this.$store.commit('setIdcTableCurrentPage', 1);
+          this.$store.commit('setIdcSearchKey', '');
+          this.handleGetIdcData({key: '', page: 1});
         }).catch(err => {
           this.$Message.error("修改IDC信息失败：", err);
         })
       },
       // 根据关键字搜索IDC
       handleSearchIdc(search_key) {
-        console.log(search_key);
+        this.handleGetIdcData({key: search_key});
       }
     },
     // 挂载组件时获取一次表格数据
     mounted() {
-      this.handleGetIdcData(this.$store.getters.getIdcTableCurrentPage);
+      this.handleGetIdcData({key: "", page: 1});
     }
   }
 </script>

@@ -59,11 +59,9 @@ export default {
     }
   },
   actions: {
-    handleGetIdcInfo({
-      commit
-    }, page) {
+    handleGetIdcInfo({ commit }, {key, page}) {
       return new Promise((resolve, reject) => {
-        getIdcInfo({page}).then(res => {
+        getIdcInfo({key, page}).then(res => {
           const data = res.data;
           commit('setIdcTableData', data.data.idc_info);
           commit('setIdcTableDataCount', data.data.count);

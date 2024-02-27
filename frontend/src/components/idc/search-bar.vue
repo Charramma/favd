@@ -17,7 +17,9 @@
     methods: {
       // 搜索
       search() {
-        this.$emit('searchIdc', this.search_key);
+        const search_key = this.search_key;
+        this.$store.commit('setIdcSearchKey', search_key);
+        this.$emit('searchIdc', search_key);
       },
       // 新建IDC
       openModal() {
